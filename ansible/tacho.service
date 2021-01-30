@@ -1,0 +1,16 @@
+[Unit]
+Description=Tacho
+Documentation=
+After=network.target
+
+[Service]
+User=root
+ExecStartPre=/bin/resetCan
+ExecStart=/bin/go-tacho-bmw
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

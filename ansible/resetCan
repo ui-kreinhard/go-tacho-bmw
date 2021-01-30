@@ -1,0 +1,7 @@
+#!/bin/bash
+ifconfig can0 down
+ifconfig can1 down
+ip link set can0 up type can bitrate 100000
+ip link set can1 up type can bitrate 100000
+ifconfig can0 txqueuelen 65536
+ifconfig can1 txqueuelen 65536

@@ -1,0 +1,44 @@
+---
+
+- name: Deploy tacho bmw
+  hosts: all
+  remote_user: pi
+  tasks:
+    - name: Copy custom config.txt
+      become: true
+      copy: 
+        src: config.txt
+        dest: /boot/config.txt
+    - name: Reboot
+      become: true
+      reboot:
+    - name: Copy resetCan
+      become: true
+      copy:
+        src: resetCan
+        dest: /bin/
+        owner: root
+        group: root
+        mode: 0755
+        
+    - name: Copy binary
+      become: true
+      copy:
+        src: ../go-tacho-bmw
+        dest: /bin/go-tacho-bmw
+        owner: root
+        group: root
+        mode: 0755
+    - name: Copy service defintion
+      become: true
+      copy:
+        src: tacho.service
+        dest: /etc/systemd/system/
+        
+    - name: Restart and enable tacho service
+      become: true
+      systemd:
+        name: tacho 
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
