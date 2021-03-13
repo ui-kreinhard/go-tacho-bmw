@@ -9,9 +9,27 @@
       copy: 
         src: config.txt
         dest: /boot/config.txt
+        
+    - name: Unblock wifi
+      command: rfkill unblock all
+      become: yes
+
+    - name: Copy wpa_supplicant
+      template:
+        src: wpa_supplicant.conf
+        dest: /etc/wpa_supplicant/wpa_supplicant.conf
+      become: yes
+
     - name: Reboot
       become: true
       reboot:
+
+    - name: set timezone
+      timezone:
+        name: "Europe/Berlin"
+      become: yes
+
+
     - name: Copy resetCan
       become: true
       copy:

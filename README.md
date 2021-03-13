@@ -27,6 +27,12 @@ I'm lazy - just one photo :)
 <img src="clock.jpeg" width="600">
 
 
+Ansible
+=======
+```
+ansible-playbook -i 192.168.2.31, setup.yml -e "wlanSSID=wlan-ssid" -e "wlanPassword=asdfasdf"
+```
+
 Used ressources
 ===============
 
