@@ -18,6 +18,7 @@
       template:
         src: wpa_supplicant.conf
         dest: /etc/wpa_supplicant/wpa_supplicant.conf
+      when: wlanSSID is defined and wlanSSID != ""
       become: yes
 
     - name: Reboot
@@ -47,6 +48,7 @@
         owner: root
         group: root
         mode: 0755
+
     - name: Copy service defintion
       become: true
       copy:
@@ -60,3 +62,19 @@
         enabled: yes
         state: restarted
         daemon_reload: yes
+
+    - name: Disable fake-hwclock
+      become: true
+      systemd:
+        name: fake-hwclock
+        enabled: no
+        state: stopped
+        daemon_reload: yes
+    - name: Copy hwclock-set
+      become: true
+      copy:
+        src: hwclock-set
+        dest: /lib/udev/hwclock-set
+        mode: 0755
+        owner: root
+        group: root

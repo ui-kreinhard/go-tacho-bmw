@@ -20,6 +20,10 @@ With increasing speed the speed needle isn't exact. So I've implemented an offse
 
 I wasn't able to remove all warnings especial the service error or the SOS call error.
 
+RTC
+===
+Pis don't have an onboard rtc chip. If you want to run it without network connectivity use one like https://www.amazon.de/-/en/ARCELI-DS3231-Precision-Arduino-Raspberry/dp/B07RDHPYJD/ref=sr_1_6?dchild=1&keywords=rtc&qid=1620468705&sr=8-6
+
 Pics
 ====
 I'm lazy - just one photo :)
@@ -41,3 +45,4 @@ Used ressources
 * https://github.com/Marcin648/e90-dashboard-ets2
 * http://www.loopybunny.co.uk/CarPC/filter.php?filter=flag_KCAN1
 * https://forum.arduino.cc/index.php?topic=701002.0
+* https://spellfoundry.com/sleepy-pi/setting-up-the-real-time-clock-on-raspbian-jessie/
