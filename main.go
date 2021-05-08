@@ -1,11 +1,15 @@
 package main
 
 import (
-	"github.com/brutella/can"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/brutella/can"
 )
 
 var lastSpeedValue = uint16(0)
@@ -22,7 +26,7 @@ func ignitionOn(bus *can.Bus) {
 }
 
 func ignitionStatus(bus *can.Bus) {
-	sendFrame(bus, 0x26E, [8]uint8{0x40, 0x40, 0x7F, 0x50, 0XFF, 0xFF, 0xFF, 0xFF})
+	sendFrame(bus, 0x26E, [8]uint8{0x40, 0x40, 0x7F, 0x50, 0xFF, 0xFF, 0xFF, 0xFF})
 }
 
 func sendSpeed(bus *can.Bus, speed uint16) {
@@ -46,7 +50,7 @@ func sendRPM(bus *can.Bus, rpm uint16) {
 	tempRPM := rpm * 4
 	sendFrame(bus, 0x0AA, [8]uint8{
 		0xFE,
-		0XFE,
+		0xFE,
 		0xFF,
 		0x00,
 		lo8(tempRPM),
@@ -128,10 +132,8 @@ func sendAbs(bus *can.Bus) {
 	})
 }
 
-
-
 func sendEngineTemp(bus *can.Bus) {
-	engineTemp2 ++
+	engineTemp2++
 	sendFrame(bus, 0x1D0, [8]uint8{
 		40 + 48, 0xFF, engineTemp2, 0xCD, 0x5D, 0x37, 0xCD, 0xA8,
 	})
@@ -184,7 +186,7 @@ func send100ms(bus *can.Bus) {
 		ignitionOn(bus)
 		ignitionStatus(bus)
 		sendRPM(bus, uint16(time.Now().Minute()*100))
-		sendSpeed(bus, uint16(time.Now().Hour()*10)-offsetMap[time.Now().Hour()*10])
+		sendSpeed(bus, uint16(int16(time.Now().Hour()*10)-offsetMap[time.Now().Hour()*10]))
 
 		time.Sleep(100 * time.Millisecond)
 	}
@@ -232,32 +234,65 @@ func debug(bus *can.Bus, val int) {
 		log.Println("sending", uint16(val))
 		ignitionOn(bus)
 		ignitionStatus(bus)
-		sendSpeed(bus, uint16(val)-offsetMap[val])
+		sendSpeed(bus, uint16(int16(val)-offsetMap[val]))
 		time.Sleep(100 * time.Millisecond)
 	}
 }
 
-var offsetMap = make(map[int]uint16)
+var offsetMap = make(map[int]int16)
+
+func readOffset() {
+	offsetsBytes, err := ioutil.ReadFile("/offset.json")
+	if err != nil {
+		fmt.Println("using default", err)
+		offsetMap[10] = 2
+		offsetMap[10] = 1
+		offsetMap[30] = 2
+		offsetMap[40] = 2
+		offsetMap[50] = 1
+		offsetMap[110] = 1
+		offsetMap[120] = 1
+		offsetMap[130] = 2
+		offsetMap[140] = 2
+		offsetMap[150] = 3
+		offsetMap[160] = 3
+		offsetMap[170] = 3
+		offsetMap[180] = 4
+		offsetMap[190] = 4
+		offsetMap[200] = 5
+		offsetMap[210] = 6
+		offsetMap[220] = 7
+		offsetMap[230] = 7
+	}
+	err = json.Unmarshal(offsetsBytes, &offsetMap)
+	if err == nil {
+		fmt.Println("using offset josn")
+	}
+	if err != nil {
+		fmt.Println("using default because", err)
+		offsetMap[10] = 2
+		offsetMap[10] = 1
+		offsetMap[30] = 2
+		offsetMap[40] = 2
+		offsetMap[50] = 1
+		offsetMap[110] = 1
+		offsetMap[120] = 1
+		offsetMap[130] = 2
+		offsetMap[140] = 2
+		offsetMap[150] = 3
+		offsetMap[160] = 3
+		offsetMap[170] = 3
+		offsetMap[180] = 4
+		offsetMap[190] = 4
+		offsetMap[200] = 5
+		offsetMap[210] = 6
+		offsetMap[220] = 7
+		offsetMap[230] = 7
+	}
+}
 
 func main() {
-	offsetMap[10] = 2
-	offsetMap[10] = 1
-	offsetMap[30] = 2
-	offsetMap[40] = 2
-	offsetMap[50] = 1
-	offsetMap[110] = 1
-	offsetMap[120] = 1
-	offsetMap[130] = 2
-	offsetMap[140] = 2
-	offsetMap[150] = 3
-	offsetMap[160] = 3
-	offsetMap[170] = 3
-	offsetMap[180] = 4
-	offsetMap[190] = 4
-	offsetMap[200] = 5
-	offsetMap[210] = 6
-	offsetMap[220] = 7
-	offsetMap[230] = 7
+	readOffset()
 	bus, _ := can.NewBusForInterfaceWithName("can0")
 	if len(os.Args) <= 1 {
 		clock(bus)
